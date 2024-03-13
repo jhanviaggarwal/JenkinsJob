@@ -1,30 +1,81 @@
 pipeline {
     agent any
-    
+
     stages {
-        stage('Build') {
+        stage("Build") {
             steps {
-                // Your build commands here
-                echo 'Build app'
+                echo  'Building project to compile and package using Maven.'
             }
         }
-        stage('Test') {
+
+        stage("Unit and Integration Tests") {
             steps {
-                // Your test commands here
-               echo 'test app' // Example Maven test command
+                echo 'JUnit test for code function.'
+                echo 'Integration Test working together.'
+            }
+            post{ 
+                    success{
+                        mail to: "jhanviaggarwal1610@gmail.com",
+                        subject: "Success: JUnit and Integration test successful.",
+                        body: "Stage is working."
+                    }
+                    failure{
+                        mail to: "jhanviaggarwal1610@gmail.com",
+                        subject: "Unsuccess: JUnit and Integration test failure.",
+                        body: "Stage is not working. Please try to test again."
+                    }
+                }
+        }
+
+        stage("Code Analysis") {
+            steps {
+                 echo 'Performing code analysis using SonarQube'
             }
         }
-        stage('Deploy') {
+
+        stage("Security Scan") {
             steps {
-                // Your deployment commands here
-                echo 'deploy app'
+               echo 'Performing security scan using SonarQube'
+            }
+             post{ 
+                    success{
+                        mail to: "jhanviaggarwal1610@gmail.com",
+                        subject: "Success: Security scans successful.",
+                        body: "Scan is secure."
+                    }
+                    failure{
+                        mail to: "jhanviaggarwal1610@gmail.com",
+                        subject: "Unsuccess: Security scans failure.",
+                        body: "Scan is not secure. Please try to protect application."
+                    }
+                }
+        }
+
+        stage("Deploy to Staging") {
+            steps {
+                 echo 'Deploy to staging sever AWS EC2 s3://staging-bucket/'
             }
         }
-        post {
-            always {
-                // Your post-deployment actions here
-               mail bcc: '', body: 'Successfull', cc: '', from: '', replyTo: '', subject: 'Jenkins Pipeline Status', to: 'jhanviaggarwal1610@gmail.com'
+
+        stage("Integration Tests on Staging") {
+            steps {
+                echo 'Run Integration Tests on Staging environment'
             }
+        }
+
+        stage("Deploy to Production") {
+            steps {
+                echo'Deploy to Production server AWS EC2'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment to production successful!'
+        }
+        failure {
+            echo 'Deployment failed!'
         }
     }
 }
